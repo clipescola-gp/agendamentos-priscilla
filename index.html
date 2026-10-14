@@ -219,7 +219,7 @@ var cfg = {
   ]
 };
 
-// Janela de 90 dias para frente (data inicial da agenda)
+// Janela de 60 dias para frente
 var TODAY_BASE = new Date();
 TODAY_BASE.setHours(0,0,0,0);
 
@@ -310,8 +310,8 @@ async function loadAvailability(){
   var today = new Date();
   today.setHours(0,0,0,0);
 
-  // 90 dias para frente — permite reuniões mais distantes
-  for(var i = 1; i <= 90; i++){
+  // 60 dias para frente
+  for(var i = 1; i <= 60; i++){
     var d = new Date(today);
     d.setDate(d.getDate() + i);
     var dow = d.getDay();
@@ -334,11 +334,10 @@ async function loadAvailability(){
   renderCal();
 }
 
-// ── CALENDÁRIO (com limite de 90 dias para frente) ────────────────────────────
+// ── CALENDÁRIO (mês atual até +60 dias) ───────────────────────────────────────
 function maxAllowedMonth(){
-  // Calcula o mês/ano máximo (90 dias a partir de hoje)
   var max = new Date(TODAY_BASE);
-  max.setDate(max.getDate() + 90);
+  max.setDate(max.getDate() + 60);
   return {y: max.getFullYear(), m: max.getMonth()};
 }
 
@@ -493,7 +492,11 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   document.getElementById('prev-m').addEventListener('click', function(){
     if(this.disabled) return;
-    cm--; if(cm < 0){cm = 11; cy--;} availDays = {}; loadAvailability();
+    cm--; if(cm < 0){cm = 11; cy--;}
+    // nunca recua antes do mês atual
+    var nowY2 = new Date().getFullYear(), nowM2 = new Date().getMonth();
+    if(cy < nowY2 || (cy === nowY2 && cm < nowM2)){ cy = nowY2; cm = nowM2; }
+    availDays = {}; loadAvailability();
   });
   document.getElementById('next-m').addEventListener('click', function(){
     if(this.disabled) return;
